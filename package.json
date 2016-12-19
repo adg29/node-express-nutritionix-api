@@ -17,9 +17,11 @@
     "bluebird": "*"
   },
   "devDependencies": {
+    "chakram": "^1.5.0",
     "mongodb": "*",
     "mongodb-core": "",
     "request": "^2.79.0",
-    "request-promise": "^4.1.1"
+    "request-promise": "^4.1.1",
+    "mocha": "*"
   }
 }
