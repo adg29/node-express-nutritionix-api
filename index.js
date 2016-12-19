@@ -19,10 +19,23 @@ var allowMethods = function(req, res, next) {
 	next();
 }
 
+app.use(allowMethods);
+
 // define behavior of param when receieved via URL e.g. /api/:collection/:id
 app.param(":collection", function(req, res, next, collection) {
-	req.collection= db.collection(collection);
+	req.collection = db.collection(collection);
+	next();
 });
+
+app.get('/api/:collection', function(req, res, next) {
+  req.collection.find({}, {
+    limit: 20,
+    sort: [['_id', -1]]
+  }).toArray(function(e, results) {
+    if (e) return next(e);
+    res.send(results);
+  });
+})
 
 app.listen(APP_PORT, function() {
 	console.log("Express listening on port " + APP_PORT);
