@@ -27,8 +27,8 @@ app.param(":collection", function(req, res, next, collection) {
 
 app.get('/api/:collection', function(req, res, next) {
   req.collection.find({}, {
-    limit: 20,
-    fields: { searchResults: 1 }
+    limit: 20
+    // ,	fields: { searchResults: 1 }
   }).then(function(docs) {
     res.send(docs);
   })
@@ -47,9 +47,9 @@ app.post('/api/:collection/:item', function(req, res, next) {
 
   // Perform the search against the https://api.nutritionix.com/v1_1/search endpoint
   reqPromise({
-    uri: 'https://api.nutritionix.com/v1_1/search',
+    uri: 'https://api.nutritionix.com/v1_1/search/'+apiSearchString,
     qs: {
-      q: apiSearchString,
+      results: '0:20',
       appId: '488d926c',
       appKey: '9177fe4638f8dfcd93ced560965f7690'
     },
