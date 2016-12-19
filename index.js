@@ -28,7 +28,7 @@ app.param(":collection", function(req, res, next, collection) {
 app.get('/api/:collection', function(req, res, next) {
   req.collection.find({}, {
     limit: 20,
-    fields: { searchResults: 0 }
+    fields: { searchResults: 1 }
   }).then(function(docs) {
     res.send(docs);
   })
