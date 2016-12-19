@@ -53,17 +53,27 @@ reqPromise({
   },
   json: true
 })
-  .then(function(data) {
+.then(function(data){
+    var scoredHits = data.hits.map(function(d, i) {
+      var distance = levenshtein.get(d.fields['item_name'], apiSearchString);
+      var scoredHit = {
+        name: d.fields['item_name'],
+        levenshteinDistance: distance,
+        hit: d.fields
+      };
+      return scoredHit;
+    });
+
     res.send({
     	nutritionix: {
     		searchString: apiSearchString,
-    		searchResults: data
+    		searchResults: scoredHits
     	}
     })
   })
   .catch(function(err) {
-    console.log(err)
-    res.send('error')
+    console.log(err.stack);
+    res.send('Error fetching and scoring item '+ apiSearchString);
   })
 })
 
