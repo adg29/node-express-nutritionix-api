@@ -37,6 +37,38 @@ app.get('/api/:collection', function(req, res, next) {
   });
 })
 
+app.post('/api/:collection/:item', function(req, res, next) {
+// Tokenize the search string and filter out stop words 
+var filteredTokens = stopword.removeStopwords(req.params.item.split(' '));
+// Use the tokenized words to build a clean search string for the API
+var apiSearchString = encodeURI(filteredTokens.join(" "));
+
+// Perform the search against the https://api.nutritionix.com/v1_1/search endpoint
+reqPromise({
+  uri: 'https://api.nutritionix.com/v1_1/search',
+  qs: {
+    q: apiSearchString,
+    appId: '488d926c',
+    appKey: '9177fe4638f8dfcd93ced560965f7690'
+  },
+  json: true
+})
+  .then(function(data) {
+    res.send({
+    	nutritionix: {
+    		searchString: apiSearchString,
+    		searchResults: data
+    	}
+    })
+  })
+  .catch(function(err) {
+    console.log(err)
+    res.send('error')
+  })
+})
+
+
+
 app.listen(APP_PORT, function() {
 	console.log("Express listening on port " + APP_PORT);
 });
