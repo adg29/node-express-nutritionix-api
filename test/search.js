@@ -32,14 +32,9 @@ describe("Nutritionix API", function() {
 
 
         before(function () {
-            foodItemPost = chakram.post(foodItemsURI+"caramel");
+            foodItemPost = chakram.post(foodItemsURI+"chicken sandwich");
         });
 
-
-        it("should require a food item parameter in the URI as a search query", function () {
-            var missingQuery = chakram.post(foodItemsURI);
-            return expect(missingQuery).to.be.api.error(400, "No search query");
-        });
 
         var shouldSupportItemSearch = function (search) {
             it("should support item search for '"+search+"'", function () {
@@ -47,7 +42,7 @@ describe("Nutritionix API", function() {
                 return expect(searchStringCheck).to.have.status(200);
             });
         };
-        
+
         it("should return name, levenshteinDistance, and hit for any queried food item", function () {
             return expect(foodItemPost).to.have.schema('nutritionix.searchResults', {
                 type: "array",
