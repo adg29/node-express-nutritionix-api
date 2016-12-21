@@ -6,6 +6,7 @@ var bodyParser = require("body-parser");
 var reqPromise = require('request-promise')  
 var stopword = require("stopword");
 var levenshtein = require('fast-levenshtein');
+var SearchString = require("./lib/SearchString");
 
 
 var app = express();
@@ -40,15 +41,18 @@ app.get('/api/:collection', function(req, res, next) {
 })
 
 app.post('/api/:collection/:item', function(req, res, next) {
-  // Tokenize the search string and filter out stop words 
-  var filteredTokens = stopword.removeStopwords(req.params.item.split(' '));
-  // Use the tokenized words to build a clean search string for the API
-  var apiSearchString = encodeURI(filteredTokens.join(" "));
+
+	// user SearchString lib to create the input for the Nutritionix API
+	var searchString = new SearchString(req.params.item);
+	var apiSearchString = searchString.filteredAndEncoded;
+
+	if(apiSearchString == "") res.status(400);
 
   // Perform the search against the https://api.nutritionix.com/v1_1/search endpoint
   reqPromise({
     uri: 'https://api.nutritionix.com/v1_1/search/'+apiSearchString,
     qs: {
+      fields: "item_id,item_name,brand_name,nf_serving_size_qty,nf_serving_size_unit,nf_calories,nf_calories_from_fat",
       results: '0:20',
       appId: '488d926c',
       appKey: '9177fe4638f8dfcd93ced560965f7690'
@@ -57,7 +61,11 @@ app.post('/api/:collection/:item', function(req, res, next) {
   })
     .then(function(data) {
       var scoredHits = data.hits.map(function(d, i) {
+      	// cacluate Levenshtein distance between generated Search String and Nutritionix food item
         var distance = levenshtein.get(d.fields['item_name'], apiSearchString);
+
+        // create an object with the original search, nutritionix results, and the Levensthein distance 
+        // to be returned in the search response for 
         var scoredHit = {
           name: d.fields['item_name'],
           levenshteinDistance: distance,
